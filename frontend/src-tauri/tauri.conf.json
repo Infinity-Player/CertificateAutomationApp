@@ -1,0 +1,19 @@
+{
+  "package": {
+    "productName": "CertificateAutomationApp",
+    "version": "0.1.0"
+  },
+  "tauri": {
+    "windows": [
+      {
+        "title": "Certificate Automation App",
+        "width": 1200,
+        "height": 800
+      }
+    ],
+    "bundle": {
+      "active": true,
+      "targets": "all"
+    }
+  }
+}
