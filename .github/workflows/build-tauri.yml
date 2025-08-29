@@ -1,9 +1,8 @@
-name: Build Tauri App
+name: Build & Release Tauri App
 
 on:
   push:
     branches: [ main ]
-  pull_request:
 
 jobs:
   build:
@@ -15,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
@@ -26,7 +25,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Setup Python (for backend)
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -40,8 +39,22 @@ jobs:
           cd frontend
           npm run tauri build
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload artifacts (optional, still accessible in Actions tab)
+        uses: actions/upload-artifact@v4
         with:
           name: tauri-build-${{ matrix.platform }}
           path: frontend/src-tauri/target/release/bundle/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/heads/main')
+        with:
+          tag_name: v${{ github.run_number }}
+          name: "Tauri Build ${{ github.run_number }}"
+          body: "Automated release of Tauri desktop builds."
+          files: |
+            frontend/src-tauri/target/release/bundle/**/*.exe
+            frontend/src-tauri/target/release/bundle/**/*.dmg
+            frontend/src-tauri/target/release/bundle/**/*.AppImage
+        env:
+          GITHUB_TOKEN: $_
